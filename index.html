@@ -16,14 +16,14 @@
         try {
             // Retrieve the version to load with a timestamp to prevent caching
             fetch(uwaPath + "src/static/version.json?ts=" + Date.now())
-                .then(function(response) {
-                    return response.json();
-                    console.log("ok")
-                })
+                // .then(function(response) {
+                //     return response.json();
+                //     console.log("ok")
+                // })
                 // Load the bundle.js?v=x.x.x and append the script in the header
-                .then(function(version) {
+                .then(function() {
                     var scriptElement = document.createElement("script");
-                    scriptElement.src = uwaPath + "dist/bundle.js?v=" + version.stable;
+                    scriptElement.src = uwaPath + "dist/bundle.js?v=v1.0";
                     console.log(scriptElement);
                     document.head.appendChild(scriptElement);
                 });
