@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:widget="http://www.netvibes.com/ns/">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget</title>
+    <script type="text/javascript">
+        var uwaPath;
+        try {
+            uwaPath = widget.uwaUrl.substring(0, widget.uwaUrl.lastIndexOf("/") + 1);
+        } catch (error) {
+            // When widget doesn't exist yet in standalone mode
+            uwaPath = "./";
+        }
+
+        try {
+            // Retrieve the version to load with a timestamp to prevent caching
+            fetch(uwaPath + "src/static/version.json?ts=" + Date.now())
+                .then(function(response) {
+                    return response.json();
+                    console.log("ok")
+                })
+                // Load the bundle.js?v=x.x.x and append the script in the header
+                .then(function(version) {
+                    var scriptElement = document.createElement("script");
+                    scriptElement.src = uwaPath + "dist/bundle.js?v=" + version.stable;
+                    console.log(scriptElement);
+                    document.head.appendChild(scriptElement);
+                });
+        } catch (error) {
+            var pElement = document.createElement("p");
+            pElement.innerText = "An error occurred while loading the widget. Please retry later.";
+            document.body.appendChild(pElement);
+        }
+    </script>
+</head>
+<body>
+    <div id="app"></div>
+    <!-- <app id="app"></app> -->
+</body>
+</html>
