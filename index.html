@@ -14,25 +14,17 @@
         }
 
         try {
-            // Retrieve the version to load with a timestamp to prevent caching
-            fetch(uwaPath + Date.now())
-                .then(function(response) {
-                    return response.json();
-                    
-                })
-                //Load the bundle.js?v=x.x.x and append the script in the header
-                .then(function() {
-                    console.log("ok")
-                    var scriptElement = document.createElement("script");
-                    scriptElement.src = uwaPath + "bundle.js?v=v1.0";
-                    console.log(scriptElement);
-                    document.head.appendChild(scriptElement);
-                });
+            // Load the bundle.js?v=v1.0 and append the script in the header
+            var scriptElement = document.createElement("script");
+            scriptElement.src = uwaPath + "bundle.js?v=v1.0";
+            console.log(scriptElement);
+            document.head.appendChild(scriptElement);
         } catch (error) {
             var pElement = document.createElement("p");
             pElement.innerText = "An error occurred while loading the widget. Please retry later.";
             document.body.appendChild(pElement);
         }
+
     </script>
 </head>
 <body>
