@@ -15,7 +15,7 @@
 
         try {
             // Retrieve the version to load with a timestamp to prevent caching
-            fetch(uwaPath + "src/static/version.json?ts=" + Date.now())
+            fetch(uwaPath + "?ts=" + Date.now())
                 // .then(function(response) {
                 //     return response.json();
                 //     console.log("ok")
