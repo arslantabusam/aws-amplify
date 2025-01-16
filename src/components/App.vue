@@ -33,8 +33,7 @@ td {
 </style>
 
 <script>
-import { widget } from "@widget-lab/3ddashboard-utils";
- 
+import { widget, requirejsPromise } from "@widget-lab/3ddashboard-utils";
 import issues from "../assets/config/issues.json";
 
 console.debug(widget);
@@ -45,9 +44,9 @@ export default {
   components: {},
   data() {
       return {
-          hello: "Hello World Widget :)",
           issues: issues[240],
-          searchQuery: ""
+          searchQuery: "",
+          filteredSubjectList: ""
       };
   },
   computed: {
@@ -58,6 +57,9 @@ export default {
           let filissues = this.issues;
           if (filissues) {
               filissues = filissues.filter(i => i.title.includes(this.searchQuery));
+          }
+          if (this.filteredSubjectList) {
+              filissues = filissues.filter(i => this.filteredSubjectList.includes(i.id.toString()));
           }
           return filissues;
       }
@@ -71,7 +73,40 @@ export default {
       widget.addEvent("onResetSearch", () => {
           this.searchQuery = "";
       });
+      this.taggerProxyCreation();
   },
-  methods: {}
+  methods: {
+      async taggerProxyCreation() {
+          const TagNavigatorProxy = await requirejsPromise("DS/TagNavigatorProxy/TagNavigatorProxy");
+          const taggerProxy = TagNavigatorProxy.createProxy({
+              widgetId: widget.id,
+              filteringMode: "WithFilteringServices"
+          });
+          taggerProxy.addEvent("onFilterSubjectsChange", data => {
+              if (data.filteredSubjectList) {
+                  this.filteredSubjectList = data.filteredSubjectList;
+                  console.log("data.filteredSubjectList", this.filteredSubjectList);
+              }
+          }),
+              taggerProxy.setSubjectsTags(this.getTagsFromIssues());
+      },
+
+      getTagsFromIssues() {
+          const tags = {};
+
+          this.issues.forEach(issue => {
+              tags[issue.id] = [
+                  {
+                      object: issue.status,
+                      dispValue: issue.status,
+                      sixw: "ds6w:when/status"
+                  }
+              ];
+          });
+          this.tags = tags;
+
+          return tags;
+      }
+  }
 };
 </script>
