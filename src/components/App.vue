@@ -10,7 +10,13 @@
           </tr>
       </thead>
       <tbody>
-          <tr v-for="issue of filteredIssues" :key="issue.id" @drop="handleDrop(issue.id, $event)" @dragenter.prevent @dragover.prevent>
+          <tr
+            v-for="issue of filteredIssues"
+            :key="issue.id"
+            @drop="handleDrop(issue.id, $event)"
+            @dragenter.prevent
+            @dragover.prevent
+          >
               <td>{{ issue.id }}</td>
               <td>{{ issue.title }}</td>
               <td>{{ issue.description }}</td>
@@ -84,6 +90,7 @@ export default {
       });
       widget.setTitle(widget.getValue("Widget Title"));
 
+      this.taggerProxyCreation();
       this.setupPreferences();
   },
   methods: {
@@ -138,6 +145,15 @@ export default {
           this.projectId = widget.getValue("Project ID");
           this.issues = issues[this.projectId];
           widget.setTitle(widget.getValue("title"));
+      },
+      handleDrop(issueId, event) {
+          console.log("drop", issueId, event.dataTransfer.getData("text"));
+          console.log(JSON.parse(event.dataTransfer.getData("text")).data.items[0]);
+          const reqName = JSON.parse(event.dataTransfer.getData("text")).data.items[0].displayName;
+          const issue = this.issues.find(i => i.id === issueId);
+          if (issue) {
+              issue.requirement.push(reqName);
+          }
       }
   }
 };
