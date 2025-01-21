@@ -6,14 +6,16 @@
               <th>Title</th>
               <th>Description</th>
               <th>Status</th>
+              <th>Requirement</th>
           </tr>
       </thead>
       <tbody>
-          <tr v-for="issue of filteredIssues" :key="issue.id">
+          <tr v-for="issue of filteredIssues" :key="issue.id" @drop="handleDrop(issue.id, $event)" @dragenter.prevent @dragover.prevent>
               <td>{{ issue.id }}</td>
               <td>{{ issue.title }}</td>
               <td>{{ issue.description }}</td>
               <td>{{ issue.status }}</td>
+              <td>{{ issue.requirement.join(", ") }}</td>
           </tr>
       </tbody>
   </table>
@@ -44,9 +46,11 @@ export default {
   components: {},
   data() {
       return {
-          issues: issues[240],
+          issues: [],
           searchQuery: "",
-          filteredSubjectList: ""
+          tags: [],
+          filteredSubjectList: undefined,
+          projectId: ""
       };
   },
   computed: {
@@ -73,7 +77,14 @@ export default {
       widget.addEvent("onResetSearch", () => {
           this.searchQuery = "";
       });
-      this.taggerProxyCreation();
+      widget.addEvent("onRefresh", () => {
+          this.projectId = widget.getPreference("Project ID").value;
+          this.issues = issues[this.projectId];
+          widget.setTitle(widget.getValue("Widget Title"));
+      });
+      widget.setTitle(widget.getValue("Widget Title"));
+
+      this.setupPreferences();
   },
   methods: {
       async taggerProxyCreation() {
@@ -106,6 +117,27 @@ export default {
           this.tags = tags;
 
           return tags;
+      },
+      setupPreferences() {
+          widget.addPreference({
+              name: "Widget Title",
+              type: "text",
+              defaultValue: ""
+          });
+          widget.addPreference({
+              name: "Project ID",
+              type: "text",
+              defaultValue: 240
+          });
+          widget.addEvent("onRefresh", () => {
+              this.projectId = widget.getValue("Project ID");
+              this.issues = issues[this.projectId];
+              widget.setTitle(widget.getValue("title"));
+          });
+
+          this.projectId = widget.getValue("Project ID");
+          this.issues = issues[this.projectId];
+          widget.setTitle(widget.getValue("title"));
       }
   }
 };
