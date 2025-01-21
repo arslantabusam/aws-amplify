@@ -11,17 +11,18 @@
       </thead>
       <tbody>
           <tr
-            v-for="issue of filteredIssues"
-            :key="issue.id"
-            @drop="handleDrop(issue.id, $event)"
-            @dragenter.prevent
-            @dragover.prevent
+              v-for="issue of filteredIssues"
+              :key="issue.id"
+              :class="{ 'row-highlight': issue.requirement.find(r => r.id === highlightReqId) }"
+              @drop="handleDrop(issue.id, $event)"
+              @dragenter.prevent
+              @dragover.prevent
           >
               <td>{{ issue.id }}</td>
               <td>{{ issue.title }}</td>
               <td>{{ issue.description }}</td>
               <td>{{ issue.status }}</td>
-              <td>{{ issue.requirement.join(", ") }}</td>
+              <td>{{ issue.requirement.map(r => r.name, r.id).join(", ") }}</td>
           </tr>
       </tbody>
   </table>
@@ -37,6 +38,9 @@ table,
 th,
 td {
   border: 1px solid;
+}
+.row-highlight {
+  background-color: #ceffff;
 }
 </style>
 
@@ -56,7 +60,8 @@ export default {
           searchQuery: "",
           tags: [],
           filteredSubjectList: undefined,
-          projectId: ""
+          projectId: "",
+          highlightReqId: ""
       };
   },
   computed: {
@@ -92,6 +97,7 @@ export default {
 
       this.taggerProxyCreation();
       this.setupPreferences();
+      this.subscribeToEvents();
   },
   methods: {
       async taggerProxyCreation() {
@@ -150,10 +156,28 @@ export default {
           console.log("drop", issueId, event.dataTransfer.getData("text"));
           console.log(JSON.parse(event.dataTransfer.getData("text")).data.items[0]);
           const reqName = JSON.parse(event.dataTransfer.getData("text")).data.items[0].displayName;
+          const reqId = JSON.parse(event.dataTransfer.getData("text")).data.items[0].objectId;
+
           const issue = this.issues.find(i => i.id === issueId);
           if (issue) {
-              issue.requirement.push(reqName);
+              issue.requirement.push({
+                  name: reqName,
+                  id: reqId
+              });
           }
+      },
+      async subscribeToEvents() {
+          const PlatformAPI = await requirejsPromise("DS/PlatformAPI/PlatformAPI");
+          PlatformAPI.subscribe("DS/PADUtils/PADCommandProxy/select", data1 => {
+              console.log("data after publish event", data1);
+              const highlightReqId = data1.data.paths[0].pop();
+              if (highlightReqId) {
+                  this.highlightReqId = highlightReqId;
+                  setTimeout(() => {
+                      this.highlightReqId = "";
+                  }, 900);
+              }
+          });
       }
   }
 };
