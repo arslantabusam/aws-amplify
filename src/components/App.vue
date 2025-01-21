@@ -22,7 +22,7 @@
               <td>{{ issue.title }}</td>
               <td>{{ issue.description }}</td>
               <td>{{ issue.status }}</td>
-              <td>{{ issue.requirement.map(r => r.name, r.id).join(", ") }}</td>
+              <td>{{ issue.requirement.map(r => r.name).join(", ") }}</td>
           </tr>
       </tbody>
   </table>
